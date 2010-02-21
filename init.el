@@ -74,7 +74,6 @@
             (ibuffer-switch-to-saved-filter-groups "default")))
 
 
-(load-library "pydo")
 (load-library "jek-js2")
 (load-library "jek-python")
 (load "~/.emacs.d/el/nxhtml/autostart.el")

@@ -23,6 +23,7 @@
            (local-file (file-relative-name
                         temp-file
                         (file-name-directory buffer-file-name))))
+      ; http://discorporate.us/jek/talks/pycheckers.py
       (list (expand-file-name "~/libexec/devtools/bin/pycheckers")
             (list local-file))))
 
