@@ -1,0 +1,15 @@
+syntax: regexp
+
+\.elc$
+aside/
+
+backups/
+auto-save-list/
+tramp
+recent-files
+
+# external repositories
+js2-mode/
+nxhtml/
+python-mode/
+yasnippet/
