@@ -45,6 +45,7 @@
                              yas/ido-prompt
                              yas/completing-prompt))
 
+(require 'dabbrev-highlight)
 (require 'all)
 
 (require 'browse-kill-ring)
