@@ -34,6 +34,7 @@
 (load-library "jek-fly")
 
 (require 'ido)
+(autoload 'idomenu "idomenu" nil t)
 (require 'yasnippet)
 (require 'dropdown-list)
 (yas/initialize)
@@ -85,6 +86,7 @@
 (global-set-key (kbd "<s-down>") 'end-of-buffer)
 (global-set-key (kbd "C-M-<down>") 'flymake-goto-next-error)
 (global-set-key (kbd "C-M-<up>") 'flymake-goto-prev-error)
+(global-set-key (kbd "M-s-÷") 'idomenu)
 
 
 (autoload 'todoo-mode "todoo" "TODO Mode" t)
