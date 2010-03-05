@@ -23,9 +23,11 @@
            (local-file (file-relative-name
                         temp-file
                         (file-name-directory buffer-file-name))))
-      ; http://discorporate.us/jek/talks/pycheckers.py
-      (list (expand-file-name "~/libexec/devtools/bin/pycheckers")
-            (list local-file))))
+      ; http://bitbucket.org/jek/sandbox/src/tip/pycheckers
+      (list
+       (expand-file-name "~/libexec/devtools/bin/python")
+       (list (expand-file-name "~/libexec/devtools/bin/pycheckers")
+             local-file))))
 
   ;;; getting weird backtraces coming from fringe + revert-buffer
   ;; (require 'fringe-helper)
