@@ -86,6 +86,7 @@
 (global-set-key (kbd "<s-down>") 'end-of-buffer)
 (global-set-key (kbd "C-M-<down>") 'flymake-goto-next-error)
 (global-set-key (kbd "C-M-<up>") 'flymake-goto-prev-error)
+(global-set-key (kbd "C-M-?") 'flymake-display-err-menu-for-current-line)
 (global-set-key (kbd "M-s-÷") 'idomenu)
 
 
