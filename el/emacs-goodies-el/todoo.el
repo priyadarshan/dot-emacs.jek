@@ -542,3 +542,20 @@ todo-items in an 'outline-mode' fashion.\n\n\\{todoo-mode-map}"
 (provide 'todoo)
 ;;; todoo.el ends here
 
+;; Fix from
+;; http://shreevatsa.wordpress.com/2007/02/04/symbols-function-definition-is-void-outline-font-lock-level/#comment-2739
+(defun outline-font-lock-level ()
+  "Makeshift function supplying broken dependencies of todoo.el."
+  (interactive)
+  (let
+      ((level (position
+               (plist-get (text-properties-at (point)) 'face)
+               '(todoo-item-header-face todoo-sub-item-header-face
+                                        todoo-item-assigned-header-face))))
+    (cond (level (+ 2 level))
+          (t
+           (save-excursion
+             (outline-previous-visible-heading 1)
+             (unless (> (point) 1)
+               (error "In outline prologue "))
+             (outline-font-lock-level))))))
