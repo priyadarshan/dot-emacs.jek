@@ -13,3 +13,7 @@ js2-mode/
 nxhtml/
 python-mode/
 yasnippet/
+
+auto-complete
+color-theme-.*
+

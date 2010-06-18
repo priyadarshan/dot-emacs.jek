@@ -4,6 +4,8 @@
         (expand-file-name "~/.emacs.d/el")
         ; svn co http://yasnippet.googlecode.com/svn/trunk yasnippet
         (expand-file-name "~/.emacs.d/el/yasnippet")
+        ; git clone http://github.com/m2ym/auto-complete.git
+        (expand-file-name "~/.emacs.d/el/auto-complete")
         (expand-file-name "~/.emacs.d/el/emacs-goodies-el")
         )
         load-path))
@@ -19,15 +21,15 @@
 (add-to-list 'exec-path (expand-file-name "~/bin"))
 (add-to-list 'exec-path "/usr/local/bin")
 
-(autoload 'pymacs-apply "pymacs")
-(autoload 'pymacs-call "pymacs")
-(autoload 'pymacs-eval "pymacs" nil t)
-(autoload 'pymacs-exec "pymacs" nil t)
-(autoload 'pymacs-load "pymacs" nil t)
-
-(pymacs-load "pastemacs" "paste-")
-(setq paste-kill-url t
-      paste-show-in-browser nil)
+; Haven't used pymacs in a while...
+;(autoload 'pymacs-apply "pymacs")
+;(autoload 'pymacs-call "pymacs")
+;(autoload 'pymacs-eval "pymacs" nil t)
+;(autoload 'pymacs-exec "pymacs" nil t)
+;(autoload 'pymacs-load "pymacs" nil t)
+;(pymacs-load "pastemacs" "paste-")
+;(setq paste-kill-url t
+;      paste-show-in-browser nil)
 
 (set-frame-parameter nil 'alpha 97)
 
@@ -49,12 +51,20 @@
 (require 'dabbrev-highlight)
 (require 'all)
 
-(require 'browse-kill-ring)
-(browse-kill-ring-default-keybindings)
+(require 'popup)
+(require 'pos-tip)
+(require 'popup-kill-ring)
 
 (require 'uniquify)
 (require 'diminish)
 (diminish 'yas/minor-mode)
+
+(require 'autopair)
+(autopair-global-mode)
+
+(autoload 'bm-toggle   "bm" "Toggle bookmark in current buffer." t)
+(autoload 'bm-next     "bm" "Goto bookmark."                     t)
+(autoload 'bm-previous "bm" "Goto previous bookmark."            t)
 
 (require 'ibuffer)
 (setq ibuffer-saved-filter-groups
@@ -78,7 +88,6 @@
 
 (load-library "jek-js2")
 (load-library "jek-python")
-(load "~/.emacs.d/el/nxhtml/autostart.el")
 
 (global-set-key (kbd "C-x C-b") 'ibuffer)
 (global-set-key (kbd "C-\\") 'call-last-kbd-macro)
@@ -88,6 +97,15 @@
 (global-set-key (kbd "C-M-<up>") 'flymake-goto-prev-error)
 (global-set-key (kbd "C-M-?") 'flymake-display-err-menu-for-current-line)
 (global-set-key (kbd "M-s-÷") 'idomenu)
+(global-set-key (kbd "<C-s-up>") 'bm-previous)
+(global-set-key (kbd "<C-s-down>") 'bm-next)
+(global-set-key (kbd "C-s-/") 'bm-toggle)
+(global-set-key (kbd "<left-fringe> <mouse-1>")
+                #'(lambda(event)
+                    (interactive "e")
+                    (save-excursion (mouse-set-point event)
+                                    (bm-toggle))))
+(global-set-key "\M-y" 'popup-kill-ring)
 
 
 (autoload 'todoo-mode "todoo" "TODO Mode" t)

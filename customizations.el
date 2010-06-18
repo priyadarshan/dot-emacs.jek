@@ -18,6 +18,7 @@
  '(flymake-allowed-file-name-masks (quote (("\\.py" flymake-pycheckers-init))))
  '(focus-follows-mouse nil)
  '(global-hl-line-mode t)
+ '(iedit-occurrence-face (quote match))
  '(indent-tabs-mode nil)
  '(indicate-buffer-boundaries (quote left))
  '(indicate-empty-lines t)
@@ -51,6 +52,8 @@
  '(fringe ((((class color) (background light)) (:background "grey97"))))
  '(mode-line ((((class color) (min-colors 88)) (:background "grey75" :foreground "black" :box (:line-width -1 :style released-button) :height 1.1 :family "optima"))))
  '(rst-mode-default ((t (:inherit text-mode-default :slant normal :weight normal :height 120 :family "monaco"))) t)
+ '(sml-modeline-end-face ((t nil)))
+ '(sml-modeline-vis-face ((t nil)))
  '(trailing-whitespace ((((class color) (background light)) (:background "#eeeeaa")))))
 
 (put 'downcase-region 'disabled nil)
