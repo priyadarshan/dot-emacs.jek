@@ -29,8 +29,9 @@
 
 ;;; Setting:
 ;;
-;; 1. Download the `popup.el' and `pos-tip.el'.
-;; 2. Put your `load-path' directory to the `popup.el' and `pos-tip.el'.
+;; 1. Download the `popup.el', `pos-tip.el' and this file.
+;; 2. Put your `load-path' directory to the `popup.el', `pos-tip.el'
+;;    and this file.
 ;; 3. Add following settings to your .emacs.
 ;;
 ;;   (require 'popup)
@@ -38,27 +39,85 @@
 ;;   (require 'popup-kill-ring)
 ;;
 ;;   (global-set-key "\M-y" 'popup-kill-ring) ; For example.
+;;
+;; * If you insert a selected item interactively, add following line to
+;;   your .emacs.
+;;
+;;   (setq popup-kill-ring-interactive-insert t)
+
+;;; Tested:
+;;
+;; * Emacs
+;;   * 23.1
+;;   * 24.0.50
+;; * popup.el
+;;   * 0.4
+;; * pos-tip.el
+;;   * 0.4.0
+;;
 
 ;;; ChangeLog:
 ;;
+;; * 0.2.7 (2010/05/05)
+;;   If `popup-kill-ring-interactive-insert' is `t' and
+;;   `C-g' was typed, clear the inserted string.
+;;
+;; * 0.2.6 (2010/05/05)
+;;   Change `popup-kill-ring' to execute `pos-tip-hide' at all time.
+;;
+;; * 0.2.5 (2010/05/02)
+;;   When `point' is on minibuffer, do ordinary `yank' command.
+;;
+;; * 0.2.4 (2010/05/01)
+;;   Fixed change a place the doing `receter'.
+;;
+;; * 0.2.3 (2010/05/01)
+;;   Add variable `popup-kill-ring-interactive-insert-face'.
+;;   Now add face for interactive inserted string when
+;;   `popup-kill-ring-interactive-insert-face' is `t'.
+;;
+;; * 0.2.2 (2010/04/29)
+;;   Fix the broken `popup-menu*' overlay window when
+;;   `popup-kill-ring-interactive-insert' is `t'.
+;;
+;; * 0.2.1 (2010/04/29)
+;;   New variable `popup-kill-ring-item-size-max'.
+;;   Now tested on `pos-tip' 0.3.6
+;;
+;; * 0.2.0 (2010/04/29)
+;;   New variable `popup-kill-ring-popup-margin-left'
+;;   New variable `popup-kill-ring-isearch'
+;;   New variable `popup-kill-ring-item-min-width'
+;;   Now `isearch' argument of `popup-menu*' is `t' by default.
+;;   If the length of item of `kill-ring' was shorter than
+;;   `popup-kill-ring-item-min-width', Now discards it.
+;;
+;; * 0.1.0
+;;   New variable `popup-kill-ring-interactive-insert'.
+;;
+;; * 0.0.9
+;;   Bug fix for `popup-kill-ring-previous'.
+;;   New variable `popup-kill-ring-pos-tip-color'.
+;;   Fix document of this file.
+;;
 ;; * 0.0.8
-;;   Modify keymap setting
+;;   Modify keymap setting.
 ;;
 ;; * 0.0.7
-;;   Added the function `popup-kill-ring-current'
-;;   Added the function `popup-kill-ring-hide'
+;;   Added the function `popup-kill-ring-current'.
+;;   Added the function `popup-kill-ring-hide'.
 ;;
 ;; * 0.0.6
-;;   `up' to `popup-kill-ring-popup-previous'
-;;   `down' to `popup-kill-ring-popup-next'
+;;   `up' to `popup-kill-ring-popup-previous'.
+;;   `down' to `popup-kill-ring-popup-next'.
 ;;
 ;; * 0.0.5
-;;   New variable `popup-kill-ring-kill-ring-show-func'
-;;   New Variable `popup-kill-ring-keymap'
+;;   New variable `popup-kill-ring-kill-ring-show-func'.
+;;   New Variable `popup-kill-ring-keymap'.
 ;;
 ;; * 0.0.4
 ;;   abolished the substring of menu item.
-;;   set margin-right and width to `popup-menu*'
+;;   set margin-right and width to `popup-menu*'.
 ;;
 ;; * 0.0.3
 ;;   `pos-tip-show' argument `DY' to 0.
@@ -73,18 +132,24 @@
 
 (require 'popup)
 (require 'pos-tip)
+;; for `return' macro
+(eval-when-compile
+  (require 'cl))
 
 
 ;;; Variables:
 
-(defconst popup-kill-ring-version "0.0.8"
+(defconst popup-kill-ring-version "0.2.7"
   "Version of `popup-kill-ring'")
 
 
 (defvar popup-kill-ring-popup-width 30
   "*Width of popup item.")
 
-(defvar popup-kill-ring-popup-margin-right 5
+(defvar popup-kill-ring-popup-margin-left 2
+  "*Width of `popup-menu*' margin-left.")
+
+(defvar popup-kill-ring-popup-margin-right 2
   "*Width of `popup-menu*' margin-right.")
 
 (defvar popup-kill-ring-timeout 1
@@ -96,10 +161,34 @@ This function requires two arguments `str' and `pos'.
 `str' is string of displaying. `pos' is point of displaying.
 Default value is `popup-kill-ring-pos-tip-show'.")
 
+(defvar popup-kill-ring-pos-tip-color nil
+  "*Face for `pos-tip-show'.
+See docstring of `pos-tip-show'.")
+
+(defvar popup-kill-ring-interactive-insert nil
+  "*Non-nil means that insert selected item of `poup-menu*' interactively.")
+
+(defvar popup-kill-ring-isearch t
+  "*Non-nil means that passes `t' to `isearch' option of `popup-menu*'")
+
+(defvar popup-kill-ring-item-min-width 3
+  "*The number that shows minimum width of displaying `kill-ring' item
+of `popup-menu*'")
+
+(defvar popup-kill-ring-item-size-max nil
+  "*The number that means max each item size of `popup-menu'.
+If item size is longer than this number, it's truncated.
+Nil means that item does not be truncate.")
+
+(defvar popup-kill-ring-interactive-insert-face 'highlight
+  "*The face for interactively inserted string when
+`popup-kill-ring-interactive-insert' is `t'.")
+
 ;; key setting for `popup-menu*'.
 (defvar popup-kill-ring-keymap
   (let ((keymap (make-sparse-keymap)))
     (set-keymap-parent keymap popup-menu-keymap)
+    (define-key keymap "\r" 'popup-kill-ring-select)
     (define-key keymap "\C-n" 'popup-kill-ring-next)
     (define-key keymap "\C-p" 'popup-kill-ring-previous)
     (define-key keymap [down] 'popup-kill-ring-next)
@@ -111,6 +200,12 @@ Default value is `popup-kill-ring-pos-tip-show'.")
     keymap)
     "A keymap for `popup-menu*' of `popup-kill-ring'.")
 
+(defvar popup-kill-ring-buffer-point-hash nil
+  "The hash of buffer(key) and list of point(value).
+key is buffer name.
+value is list of points (start . end).
+this is internal variable for `popup-kill-ring'.")
+
 
 ;;; Functions:
 
@@ -118,34 +213,91 @@ Default value is `popup-kill-ring-pos-tip-show'.")
   "Interactively insert selected item from `key-ring' by `popup.el'
 and `pos-tip.el'"
   (interactive)
-  (let* ((c 0)
-         (kring  (mapcar #'(lambda (arg)
-                             (with-temp-buffer
-                               (erase-buffer)
-                               (insert (replace-regexp-in-string
-                                        "[ \t]+" " "
-                                        (replace-regexp-in-string
-                                         "\n" "" arg)))
-                               (prog1 (format "%d: %s"
-                                              c
-                                              (buffer-substring-no-properties
-                                               (point-min) (point-max)))
-                                 (setq c (1+ c)))))
-                         kill-ring))
-         num item)
-    (setq item (popup-menu* kring
-                            :width popup-kill-ring-popup-width
-                            :keymap popup-kill-ring-keymap
-                            :margin-right popup-kill-ring-popup-margin-right
-                            :scroll-bar t))
-    (when item
-      (when (string-match "^\\([0-9]*\\): " item)
-        (setq num (string-to-number (match-string 1 item)))
-        (insert (nth num kill-ring))))))
+  (cond
+   ((minibufferp)
+    (yank))
+   (t (let* ((index 0)
+             (summary 0)
+             (kring (let (l p-max)
+                      (dolist (i kill-ring)
+                        (when (or (null popup-kill-ring-item-min-width)
+                                  (>= (length i)
+                                      popup-kill-ring-item-min-width))
+                          (setq l
+                                (cons
+                                 (propertize
+                                  (with-temp-buffer
+                                    (erase-buffer)
+                                    (insert (replace-regexp-in-string
+                                             "[ \t]+" " "
+                                             (replace-regexp-in-string
+                                              "\n" " " i)))
+                                    (cond
+                                     ((and popup-kill-ring-item-size-max
+                                           (>= (point-max)
+                                               popup-kill-ring-item-size-max))
+                                      (setq p-max
+                                            popup-kill-ring-item-size-max))
+                                     (t
+                                      (setq p-max (point-max))))
+                                    (buffer-substring-no-properties
+                                     (point-min) p-max))
+                                  'index index
+                                  'summary (concat "("
+                                                   (int-to-string summary)
+                                                   ")"))
+                                 l))
+                          (setq summary (1+ summary)))
+                        (setq index (1+ index)))
+                      (when l
+                        (nreverse l))))
+             (popup-kill-ring-buffer-point-hash (make-hash-table :test 'equal))
+             num item)
+        (when popup-kill-ring-interactive-insert
+          (popup-kill-ring-insert-item 0))
+        ;; always execute `pos-tip-hide'
+        ;; (the case that the item was selected.
+        ;;  the case that it was typed `C-g'.)
+        (unwind-protect
+            (progn (setq item (popup-menu* kring
+                                           :width popup-kill-ring-popup-width
+                                           :keymap popup-kill-ring-keymap
+                                           :margin-left popup-kill-ring-popup-margin-left
+                                           :margin-right popup-kill-ring-popup-margin-right
+                                           :scroll-bar t
+                                           :isearch popup-kill-ring-isearch))
+                   (when item
+                     (setq num (popup-kill-ring-get-index item))
+                     (when num
+                       (insert (nth num kill-ring)))))
+          (pos-tip-hide)
+          ;; If `C-g' was typed, clear the inserted string. (7 is `C-g'.)
+          (when (and popup-kill-ring-interactive-insert
+                     (= last-input-event 7))
+            (popup-kill-ring-clear-inserted)))))))
 
 (defun popup-kill-ring-pos-tip-show (str pos)
   (when (eq window-system 'x)
-    (pos-tip-show str nil pos nil 0 nil nil nil 0)))
+    (pos-tip-show str popup-kill-ring-pos-tip-color pos nil 0 nil nil nil 0)))
+
+(defun popup-kill-ring-select ()
+  (interactive)
+  (let* ((m (with-no-warnings menu))
+         (num (popup-cursor m))
+         (lst (popup-list m))
+         (item (popup-item-value-or-self (nth num lst)))
+         (p (gethash (buffer-name) popup-kill-ring-buffer-point-hash)))
+    (when popup-kill-ring-interactive-insert
+      (goto-char (cdr (gethash (buffer-name)
+                               popup-kill-ring-buffer-point-hash)))
+      (when (and p (listp p))
+        ;; After the `popup-isearch', these is the case that diffrence selected
+        ;; item of `popup-menu*' from inserted string to `current-buffer'.
+        (unless (string= (buffer-substring (car p) (cdr p)) item)
+          (delete-region (car p) (cdr p))
+          (return item)))
+      (return))
+    (return item)))
 
 (defun popup-kill-ring-next ()
   (interactive)
@@ -159,21 +311,26 @@ and `pos-tip.el'"
          item)
     (when (>= num len)
       (setq num 0))
+    (when popup-kill-ring-interactive-insert
+      (popup-kill-ring-clear-inserted))
+    (setq item (popup-x-to-string (nth num lst)))
+    ;; Variable `num' is converted from the index of `popup-menu*'
+    ;; to the index of `kill-ring'.
+    (setq num (popup-kill-ring-get-index item))
     ;; Since the every time drawing is very heavy,
     ;; `pos-tip' help is displays when timeout occured.
     (with-timeout
         (popup-kill-ring-timeout
          (progn
            ;; display selected item of kill-ring by `pos-tip-show'
-           (setq item (popup-x-to-string (nth num lst)))
-           (when (string-match "^\\([0-9]*\\): " item)
-             (setq num (string-to-number (match-string 1 item))))
            (when num
              (funcall popup-kill-ring-kill-ring-show-func
                       (format "%s" (nth num kill-ring))
                       (popup-child-point m offset)))))
       (pos-tip-hide)
       (popup-next m)
+      (when popup-kill-ring-interactive-insert
+        (popup-kill-ring-insert-item num))
       ;; wait for timeout
       (sit-for (+ 0.5 popup-kill-ring-timeout)))))
 
@@ -189,8 +346,7 @@ and `pos-tip.el'"
          item)
     ;; display selected item of kill-ring by `pos-tip-show'
     (setq item (popup-x-to-string (nth num lst)))
-    (when (string-match "^\\([0-9]*\\): " item)
-      (setq num (string-to-number (match-string 1 item))))
+    (setq num (popup-kill-ring-get-index item))
     (when num
       (funcall popup-kill-ring-kill-ring-show-func
                (format "%s" (nth num kill-ring))
@@ -206,23 +362,28 @@ and `pos-tip.el'"
          (len (length lst))
          (offset (popup-offset m))
          item)
-    (when (>= num len)
-      (setq num 0))
+    (when popup-kill-ring-interactive-insert
+      (popup-kill-ring-clear-inserted))
+    (when (< num 0)
+      (setq num (1- len)))
+    (setq item (popup-x-to-string (nth num lst)))
+    ;; Variable `num' is converted from the index of `popup-menu*'
+    ;; to the index of `kill-ring'.
+    (setq num (popup-kill-ring-get-index item))
     ;; Since the every time drawing is very heavy,
     ;; `pos-tip' help is displays when timeout occured.
     (with-timeout
         (popup-kill-ring-timeout
          (progn
            ;; display selected item of kill-ring by `pos-tip-show'
-           (setq item (popup-x-to-string (nth num lst)))
-           (when (string-match "^\\([0-9]*\\): " item)
-             (setq num (string-to-number (match-string 1 item))))
            (when num
              (funcall popup-kill-ring-kill-ring-show-func
                       (format "%s" (nth num kill-ring))
                       (popup-child-point m offset)))))
       (pos-tip-hide)
       (popup-previous m)
+      (when popup-kill-ring-interactive-insert
+        (popup-kill-ring-insert-item num))
       ;; wait for timeout
       (sit-for (+ 0.5 popup-kill-ring-timeout)))))
 
@@ -230,6 +391,35 @@ and `pos-tip.el'"
   (interactive)
   (pos-tip-hide))
 
+(defun popup-kill-ring-get-index (item)
+  (with-temp-buffer
+    (erase-buffer)
+    (insert item)
+    (get-text-property (point-min) 'index)))
+
+(defun popup-kill-ring-insert-item (num)
+    (let* ((item (format "%s" (nth num kill-ring)))
+           (s (point))
+           (e (+ s (length item)))
+           ol)
+      (puthash (buffer-name) (cons s e)
+               popup-kill-ring-buffer-point-hash)
+      (unwind-protect
+          (with-timeout (1.0 (if ol (delete-overlay ol)))
+            (insert item)
+            (recenter)
+            (setq ol (make-overlay s e))
+            (overlay-put ol 'face popup-kill-ring-interactive-insert-face)
+            (sit-for 0.5))
+        (if ol (delete-overlay ol)))))
+
+(defun popup-kill-ring-clear-inserted ()
+  (when popup-kill-ring-interactive-insert
+    (let* ((p (gethash (buffer-name)
+                       popup-kill-ring-buffer-point-hash)))
+      (when (and p (listp p))
+        (delete-region (car p) (cdr p))
+        (goto-char (car p))))))
 
 (provide 'popup-kill-ring)
 

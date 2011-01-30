@@ -4,15 +4,26 @@ syntax: regexp
 aside/
 
 backups/
+var/
 auto-save-list/
 tramp
-recent-files
+customizations-private\.el
+url/
 
 # external repositories
 js2-mode/
 nxhtml/
 python-mode/
 yasnippet/
+drag-stuff/
+emacs-w3m/
+eproject/
+python-mode-src/
+anything-config/
+org-mode/
+org-\d+\.\d+/
+org-icons/
+
 
 auto-complete
 color-theme-.*

@@ -5,13 +5,15 @@
 (defun jek-py-hooks ()
   (flyspell-prog-mode)
   (yas/minor-mode-on)
-  (imenu-add-menubar-index)
-  (turn-on-eldoc-mode)
+  (hs-minor-mode)
+  (hideshowvis-enable)
   (set-variable 'fill-column 78)
-)
+  (setq autopair-handle-action-fns
+        (list #'autopair-default-handle-action
+              #'autopair-python-triple-quote-action)))
 (add-hook 'python-mode-hook 'jek-py-hooks)
 
-(eval-after-load 'python-mode
+(eval-after-load 'python-modeXXX
   ;; jek's python font-lock
   '(setq python-font-lock-keywords
          `(,(rx symbol-start
